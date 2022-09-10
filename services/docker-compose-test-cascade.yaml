@@ -1,0 +1,17 @@
+# this will return the proxy server ip address and server ip address
+version: "3.9"
+services:
+    reverse-proxy:
+        image: "nginx:1.19"
+        container_name: reverse-proxy
+        volumes:
+          - ./nginx-reverse-proxy.conf:/etc/nginx/nginx.conf
+        ports:
+          - "8000:80"
+    end-server:
+        image: "tiangolo/uvicorn-gunicorn-fastapi:python3.7"
+        container_name: end-server
+        volumes:
+          - ./main.py:/app/main.py
+        environment:
+          - MAX_WORKERS=1

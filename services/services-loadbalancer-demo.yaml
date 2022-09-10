@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service	
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  type: LoadBalancer
+  ports:
+  - nodePort: 31111 # access this with the minikube ip, and you should see multiple ip addresses if you hit it multiple times
+    port: 80
+    targetPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      volumes:
+      - name: shared-volume
+        hostPath:
+          path: /mnt/nfs_share/nginx.conf # please enable nfs first and copy nginx.conf to the mounted dir
+      containers:
+      - name: nginx-container
+        image: "nginx:1.19"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /etc/nginx/nginx.conf
+
